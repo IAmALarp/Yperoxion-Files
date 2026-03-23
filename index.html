@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>YPEROXION FILES</title>
+  <style>
+    body {
+      background: #000;
+      color: #8b0000;
+      font-family: 'Courier New', monospace;
+      text-align: center;
+      padding: 20px;
+      margin: 0;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      position: relative;
+    }
+    .header {
+      font-size: 3em;
+      font-weight: bold;
+      color: #ff0000;
+      text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000;
+      letter-spacing: 2px;
+      margin: 30px 0;
+      animation: drip 3s infinite;
+    }
+    @keyframes drip {
+      0% { text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000; }
+      50% { text-shadow: 0 0 15px #ff0000, 0 0 30px #ff0000; }
+      100% { text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000; }
+    }
+    .countdown {
+      font-size: 4em;
+      font-weight: bold;
+      color: #ff0000;
+      margin: 20px 0;
+      text-shadow: 0 0 5px #ff0000;
+    }
+    .message {
+      font-size: 1.2em;
+      margin-top: 30px;
+      color: #ff3333;
+    }
+    .music-player {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.8);
+      border-top: 2px solid #ff0000;
+      padding: 15px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      backdrop-filter: blur(5px);
+      box-shadow: 0 -5px 20px rgba(255, 0, 0, 0.3);
+      flex-wrap: wrap;
+    }
+    .song-info {
+      text-align: left;
+      color: #fff;
+    }
+    .song-title {
+      font-size: 1.2em;
+      font-weight: bold;
+      color: #ff0000;
+      margin: 0;
+    }
+    .song-artist {
+      font-size: 0.9em;
+      color: #ff6666;
+      margin: 0;
+    }
+    .controls {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+    button {
+      background: #ff0000;
+      color: #000;
+      border: none;
+      padding: 8px 15px;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 5px;
+      font-family: 'Courier New', monospace;
+      transition: all 0.3s;
+      box-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+    }
+    button:hover {
+      background: #ff3333;
+      box-shadow: 0 0 10px #ff0000;
+    }
+    .volume-slider {
+      width: 100px;
+      height: 5px;
+      -webkit-appearance: none;
+      background: #333;
+      border-radius: 5px;
+      outline: none;
+    }
+    .volume-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: #ff0000;
+      cursor: pointer;
+      box-shadow: 0 0 5px #ff0000;
+    }
+    .volume-label {
+      color: #ff0000;
+      font-size: 0.8em;
+    }
+    #youtubePlayer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 9999;
+      background: #000;
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">YPEROXION FILES</div>
+  <div class="countdown" id="countdown">0d 0h 0m 0s</div>
+  <div class="message">THE END IS NEAR. PREPARE.</div>
+
+  <audio id="bgMusic" loop crossorigin="anonymous"></audio>
+
+  <div class="music-player">
+    <div class="song-info">
+      <p class="song-title">Billie Jean</p>
+      <p class="song-artist">Michael Jackson</p>
+    </div>
+    <div class="controls">
+      <button id="playBtn" onclick="togglePlay()">▶ PLAY</button>
+      <button id="restartBtn" onclick="restartMusic()">↻ RESTART</button>
+    </div>
+    <div class="volume-label">
+      VOL
+      <input type="range" id="volumeSlider" class="volume-slider" min="0" max="100" value="50" oninput="setVolume()">
+    </div>
+  </div>
+
+  <!-- YouTube Player (hidden until countdown ends) -->
+  <div id="youtubePlayer">
+    <iframe 
+      id="ytFrame" 
+      width="80%" 
+      height="80%" 
+      src="" 
+      frameborder="0" 
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+      allowfullscreen>
+    </iframe>
+  </div>
+
+  <script>
+    // ===== GLOBAL COUNTDOWN =====
+    const STORAGE_KEY = 'yperoxion_endtime';
+    const COUNTDOWN_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days
+    const YOUTUBE_VIDEO_ID = '4-4DdQVp72Q'; // Michael Jackson - Billie Jean (Official Video)
+
+    function initializeCountdown() {
+      let endTime = localStorage.getItem(STORAGE_KEY);
+      
+      if (!endTime) {
+        endTime = Date.now() + COUNTDOWN_DURATION;
+        localStorage.setItem(STORAGE_KEY, endTime);
+      }
+      
+      return parseInt(endTime);
+    }
+
+    const doomsday = initializeCountdown();
+
+    function updateCountdown() {
+      const now = Date.now();
+      const distance = doomsday - now;
+
+      if (distance < 0) {
+        document.getElementById("countdown").innerText = "0d 0h 0m 0s";
+        // Show YouTube player and play video
+        document.getElementById('youtubePlayer').style.display = 'flex';
+        const ytFrame = document.getElementById('ytFrame');
+        ytFrame.src = `https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}?autoplay=1&controls=1&rel=0&showinfo=0`;
+        return;
+      }
+
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      document.getElementById("countdown").innerText = 
+        `${days}d ${hours}h ${minutes}m ${seconds}s`;
+    }
+
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+
+    // ===== MUSIC PLAYER =====
+    const audio = document.getElementById('bgMusic');
+    const playBtn = document.getElementById('playBtn');
+    const volumeSlider = document.getElementById('volumeSlider');
+
+    // Using a royalty-free track for background music
+    audio.src = 'https://soundcloud.com/maitre80/billie-jean-michael-jackson?si=4e828754ca4c4030bc677fb45699446f&utm_source=clipboard&utm_medium=text&utm_campaign=social_sharing';
+
+    // Try to auto-play on user interaction
+    document.addEventListener('click', () => {
+      if (audio.paused && audio.src) {
+        audio.play().catch(err => console.log('Auto-play blocked'));
+        playBtn.innerText = '⏸ PAUSE';
+      }
+    });
+
+    function togglePlay() {
+      if (audio.paused) {
+        audio.play().catch(err => alert('Error playing audio: ' + err.message));
+        playBtn.innerText = '⏸ PAUSE';
+      } else {
+        audio.pause();
+        playBtn.innerText = '▶ PLAY';
+      }
+    }
+
+    function restartMusic() {
+      audio.currentTime = 0;
+      audio.play().catch(err => alert('Error playing audio: ' + err.message));
+      playBtn.innerText = '⏸ PAUSE';
+    }
+
+    function setVolume() {
+      audio.volume = volumeSlider.value / 100;
+    }
+
+    // Update button text when audio ends
+    audio.addEventListener('ended', () => {
+      playBtn.innerText = '▶ PLAY';
+    });
+
+    // Initialize volume
+    setVolume();
+  </script>
+</body>
+</html>
