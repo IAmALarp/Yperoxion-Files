@@ -17,7 +17,7 @@
       flex-direction: column;
       min-height: 100vh;
       position: relative;
-      cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="red"><circle cx="8" cy="8" r="2" stroke="red" stroke-width="1" fill="none"/></svg>'), auto;
+      cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="red"><circle cx="8" cy="8" r="4" stroke="red" stroke-width="1" fill="none"/></svg>'), auto;
     }
     .header {
       font-size: 3em;
@@ -146,14 +146,6 @@
       50% { opacity: 1; }
       100% { opacity: 0.3; }
     }
-    #audioFrame {
-      position: fixed;
-      top: -1000px;
-      left: -1000px;
-      width: 1px;
-      height: 1px;
-      border: none;
-    }
   </style>
 </head>
 <body>
@@ -161,38 +153,28 @@
   <div class="countdown" id="countdown">0d 0h 0m 0s</div>
   <div class="message">THE END IS NEAR. PREPARE.</div>
 
-  <!-- Hidden iframe for background audio -->
-  <iframe id="audioFrame" src="" allow="autoplay"></iframe>
+  <audio id="bgMusic" loop autoplay></audio>
 
   <!-- Tabs -->
   <div class="tabs">
-    <div class="tab" onclick="showTab('music')">MUSIC</div>
     <div class="tab" onclick="showTab('downloads')">DOWNLOADS</div>
     <div class="tab" onclick="showTab('files')">FILES</div>
   </div>
 
   <!-- Tab Content -->
-  <div id="music" class="tab-content">
-    <h2>▶ PLAYING: YouTube Audio</h2>
-    <p>Background music from YouTube.</p>
-  </div>
-
   <div id="downloads" class="tab-content">
     <h2>⬇ DOWNLOADS</h2>
-    <a href="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" download="Billie_Jean_Cover.mp3" class="download-link">Download Billie Jean (MP3)</a>
-    <a href="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" download="Doomsday_Theme.wav" class="download-link">Download Doomsday Theme (WAV)</a>
     <a href="https://drive.google.com/drive/folders/1ObNfldU1__etVf9Hi6Df2NW1XSSYzJXT?usp=sharing" target="_blank" class="download-link">Download YPEROXION LOGS (Google Drive)</a>
-    <a href="https://via.placeholder.com/600x400/000000/ff0000?text=RED_STARS" download="Red_Stars_Background.png" class="download-link">Download Red Star Background (PNG)</a>
   </div>
 
   <div id="files" class="tab-content">
     <h2>📁 FILES</h2>
     <div class="file-list">
-      <div>YPEROXION_LOGS_001.txt</div>
-      <div>DOOMSDAY_COUNTDOWN.js</div>
-      <div>BILLIE_JEAN_COVER.mp3</div>
-      <div>RED_STARS_BACKGROUND.png</div>
-      <div>YPEROXION_FILES.zip</div>
+      <div><a href="https://drive.google.com/file/d/1EsdMPpf5KeUh71_BQ409yRbXGg68ob2P/view?usp=drive_link" target="_blank">YPEROXION_LOGS_001.png</a></div>
+      <div><a href="https://drive.google.com/file/d/1yrE-F1C4fFiHwsIlO0h0Xcn1FLXCZETR/view?usp=drive_link" target="_blank">YPEROXION_LOGS_002.png</a></div>
+      <div><a href="https://drive.google.com/file/d/1jtje6PXcWC0DZ8EwfeeEfEgR1fTC5arq/view?usp=drive_link" target="_blank">YPEROXION_LOGS_003.png</a></div>
+      <div><a href="https://drive.google.com/file/d/1lqjhKG2JPnuVm9Bthr-d7Q0Ack8UNAcg/view?usp=drive_link" target="_blank">YPEROXION_LOGS_004.png</a></div>
+      <div><a href="https://drive.google.com/file/d/1DjtgQRjfUGK9gaxZhTZQx-p0NjNnUYnN/view?usp=drive_link" target="_blank">YPEROXION_FILES.mp4</a></div>
     </div>
   </div>
 
@@ -216,18 +198,18 @@
     const ytFrame = document.getElementById('ytFrame');
     ytFrame.src = `https://www.youtube.com/embed/4-4DdQVp72Q?autoplay=1&controls=1&rel=0`;
 
-    // ===== YOUTUBE AUDIO BACKGROUND =====
-    const audioFrame = document.getElementById('audioFrame');
-    const YOUTUBE_AUDIO_ID = 'rtg64wsOC0A'; // Your video ID
+    // ===== BACKGROUND MUSIC (YOUR GOOGLE DRIVE FILE) =====
+    const audio = document.getElementById('bgMusic');
 
-    // Set up audio iframe
-    audioFrame.src = `https://www.youtube.com/embed/${YOUTUBE_AUDIO_ID}?autoplay=1&loop=1&playlist=${YOUTUBE_AUDIO_ID}&controls=0&showinfo=0&rel=0&modestbranding=1&enablejsapi=1`;
+    // Convert Google Drive link to direct download
+    const driveFileId = '19gvaVRuplH9SZD-IpKJ0hJdQ0udozRob';
+    audio.src = `https://drive.google.com/uc?export=download&id=${driveFileId}`;
 
-    // Try to auto-play on page load
-    document.addEventListener('click', () => {
-      if (audioFrame.contentWindow) {
-        audioFrame.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-      }
+    // Auto-play on page load
+    window.addEventListener('load', () => {
+      audio.play().catch(err => {
+        console.log('Auto-play blocked — user must click to start');
+      });
     });
 
     // ===== TAB SWITCHER =====
@@ -245,14 +227,14 @@
       document.querySelector(`.tab[onclick="showTab('${tabId}')"]`).classList.add('active');
     }
 
-    // ===== RED DOTTED CURSOR =====
+    // ===== RED DOTTED CURSOR (BIGGER) =====
     document.addEventListener('mousemove', (e) => {
       const cursor = document.createElement('div');
       cursor.style.position = 'fixed';
       cursor.style.left = e.clientX + 'px';
       cursor.style.top = e.clientY + 'px';
-      cursor.style.width = '4px';
-      cursor.style.height = '4px';
+      cursor.style.width = '8px';  // Bigger cursor
+      cursor.style.height = '8px';
       cursor.style.backgroundColor = 'red';
       cursor.style.borderRadius = '50%';
       cursor.style.pointerEvents = 'none';
@@ -265,7 +247,7 @@
       }, 1000);
     });
 
-    // ===== MOVING RED STARS =====
+    // ===== MOVING RED STARS (FIXED) =====
     function createStars(count) {
       for (let i = 0; i < count; i++) {
         const star = document.createElement('div');
@@ -275,16 +257,16 @@
         star.style.left = Math.random() * 100 + 'vw';
         star.style.top = Math.random() * 100 + 'vh';
         star.style.animationDelay = Math.random() * 3 + 's';
-        document.body.appendChild(star);
+        document.body.appendChild(star);  // ✅ Actually append to DOM
       }
     }
 
     createStars(20); // 20 stars
 
-    // ===== RESTART AUDIO ON CLICK (if auto-play blocked) =====
+    // ===== RESTART MUSIC ON CLICK (if auto-play blocked) =====
     document.addEventListener('click', () => {
-      if (audioFrame.contentWindow) {
-        audioFrame.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      if (audio.paused) {
+        audio.play().catch(err => console.log('Play failed'));
       }
     });
   </script>
